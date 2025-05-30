@@ -34,83 +34,85 @@
   </div>
 
   <script>
+    const baseUrl = "https://web-production-a2951.up.railway.app";
+  
     async function loadPatients() {
-      const response = await fetch("http://localhost:5000/patients");
+      const response = await fetch(`${baseUrl}/patients`);
       const patients = await response.json();
       const list = document.getElementById("patientList");
       list.innerHTML = "";
-
+  
       patients.forEach(p => {
         const card = document.createElement("div");
         card.className = "card";
-
+  
         const cardBody = document.createElement("div");
         cardBody.className = "card-body";
-
+  
         const title = document.createElement("h5");
         title.className = "card-title";
         title.innerHTML = `${p.name} <small class="text-muted">(ID: ${p.id})</small>`;
-
+  
         const symptoms = document.createElement("p");
         symptoms.className = "card-text";
         const symptomsText = p.symptoms.length > 0
           ? p.symptoms.map(s => `${s.name} (${s.severity})`).join(", ")
           : "None";
         symptoms.innerHTML = `<strong>Symptoms:</strong> ${symptomsText}`;
-
+  
         const evaluateBtn = document.createElement("button");
         evaluateBtn.className = "btn btn-primary btn-sm me-2";
         evaluateBtn.textContent = "Evaluate";
         evaluateBtn.onclick = () => evaluatePatient(p.id);
-
+  
         const addSymptomBtn = document.createElement("button");
         addSymptomBtn.className = "btn btn-secondary btn-sm";
         addSymptomBtn.textContent = "Add Symptom";
         addSymptomBtn.onclick = () => {
           document.getElementById(`form-${p.id}`).style.display = "block";
         };
-
+  
         const formDiv = document.createElement("div");
         formDiv.id = `form-${p.id}`;
         formDiv.style.display = "none";
         formDiv.className = "mt-3";
-
+  
         const inputName = document.createElement("input");
         inputName.type = "text";
         inputName.placeholder = "Symptom name";
         inputName.id = `symptom-${p.id}`;
         inputName.className = "form-control mb-2";
-
+  
         const inputSeverity = document.createElement("input");
         inputSeverity.type = "number";
         inputSeverity.placeholder = "Severity (1-10)";
         inputSeverity.id = `severity-${p.id}`;
         inputSeverity.className = "form-control mb-2";
-
+  
         const submitBtn = document.createElement("button");
         submitBtn.textContent = "Submit";
         submitBtn.className = "btn btn-success";
         submitBtn.onclick = () => addSymptom(p.id);
-
+  
         formDiv.appendChild(inputName);
         formDiv.appendChild(inputSeverity);
         formDiv.appendChild(submitBtn);
-
+  
         cardBody.appendChild(title);
         cardBody.appendChild(symptoms);
         cardBody.appendChild(evaluateBtn);
         cardBody.appendChild(addSymptomBtn);
         cardBody.appendChild(formDiv);
-
+  
         card.appendChild(cardBody);
         list.appendChild(card);
       });
     }
-
+  
     async function addPatient() {
       const name = document.getElementById("newPatientName").value;
       if (!name) return alert("Please enter a name.");
-      await fetch("http://localhost:5000/patients", {
+      await fetch(`${baseUrl}/patients`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name })
@@ -118,25 +120,25 @@
       document.getElementById("newPatientName").value = "";
       loadPatients();
     }
-
+  
     async function addSymptom(patientId) {
       const name = document.getElementById(`symptom-${patientId}`).value;
       const severity = parseInt(document.getElementById(`severity-${patientId}`).value);
       if (!name || isNaN(severity)) return alert("Fill in all fields.");
-      await fetch(`http://localhost:5000/patients/${patientId}/symptoms`, {
+      await fetch(`${baseUrl}/patients/${patientId}/symptoms`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, severity })
       });
       loadPatients();
     }
-
+  
     async function evaluatePatient(patientId) {
-      const res = await fetch(`http://localhost:5000/evaluate/${patientId}`);
+      const res = await fetch(`${baseUrl}/evaluate/${patientId}`);
       const data = await res.json();
       alert(`Patient status: ${data.status}`);
     }
-
+  
     window.onload = loadPatients;
   </script>
 </body>
